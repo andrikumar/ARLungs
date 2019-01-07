@@ -1,0 +1,175 @@
+var background;
+var body;
+let lungsone;
+
+//posenet
+let video;
+let poseNet;
+let poses = [];
+let skeletons = [];
+let lungs;
+let xlung;
+let ylung;
+
+//shoulder mapping
+let rsholdx;
+let lsholdx;
+let rsholdy;
+let lsholdy
+let xwidth;
+let ywidth;
+
+//audio for project
+var noises;
+var audio;
+
+var w = 1900 //2500,
+h = 1000 //1412;
+
+var a = 500;
+var b = 250;
+
+var d;
+var e;
+
+function preload() {
+  //audio
+
+  audio = loadSound('audio2.mp3');
+  audio.addCue(55, changeBackground);
+
+  noises = loadSound('audio1.mp3');
+
+
+  //pre text
+  pre = loadImage("123.gif");
+  pre = createImg("123.gif");
+  pre.size(w - 280, h - 50);
+
+  //post text
+  post = loadImage("Comp 9.gif");
+  post = createImg("Comp 9.gif");
+  post.size(w - 280, h -50);
+  post.hide();
+
+
+
+   lungs = loadImage("lungs.gif");
+   lungs = createImg("lungs.gif");
+    lungs.hide();
+
+
+  //images for animtion
+  one = loadImage("one.png");
+  one.resize(a, b);
+
+  two = loadImage("two.png");
+  two.resize(a, b);
+
+  three = loadImage("three.png");
+  three.resize(a, b);
+
+  four = loadImage("four.png");
+  four.resize(a, b);
+
+  five = loadImage("five.png");
+  five.resize(a, b);
+
+  six = loadImage("six.png");
+  six.resize(a, b);
+
+  seven = loadImage("seven.png");
+  seven.resize(a, b);
+  
+
+//
+  background = loadAnimation(one, two, three, four, five, six, seven);
+body = loadAnimation("lungsone.png", "lungstwo.png", "lungsfour.png", "lungsfive.png", "lungssix.png", "lungsseven.png", "lungseight.png", "lungsten.png", "lungseleven.png","lungstweleve.png", "lungsthir.png", "lungsfourteen.png", "lungsfifteen.png" );
+}
+
+
+function setup() {
+  createCanvas(w, h);
+  video = createCapture(VIDEO);
+  video.size(width, height);
+
+
+  poseNet = ml5.poseNet(video, modelReady);
+  poseNet.on('pose', function(results) {
+    poses = results;
+  });
+  // Hide the video element, and just show the canvas
+  video.hide();
+}
+
+function modelReady() {
+  select('#status').html('Model Loaded');
+}
+
+function draw() {
+  image(video, 0, 0, w, h);
+
+  // We can call both functions to draw all keypoints and the skeletons
+  drawKeypoints();
+  animation(background, 900, 450);
+//  animation(body, xwidth /2, d - 300 , 100, 400);
+   lungs.position(e -500, d -590=, 5, 5);
+    lungs.size(1000,550);
+
+  pre.position(0, 0);
+}
+
+
+function drawKeypoints() {
+  // Loop through all the poses detected
+  for (let i = 0; i < poses.length; i++) {
+    // For each pose detected, loop through all the keypoints
+    for (let j = 0; j < poses[i].pose.keypoints.length; j++) {
+      // A keypoint is an object describing a body part (like rightArm or leftShoulder)
+        console.log(poses[i].pose.keypoints);
+      xlung = poses[0].pose.keypoints[0].position.x;
+      ylung = poses[0].pose.keypoints[0].position.y;
+       rsholdx = poses[0].pose.keypoints[5].position.x;
+      lsholdx = poses[0].pose.keypoints[6].position.x;
+      
+    	xwidth = rsholdx + lsholdx;
+      
+      rsholdy = poses[0].pose.keypoints[5].position.y;
+      lsholdy = poses[0].pose.keypoints[6].position.y;
+      
+      ywidth = rsholdy + lsholdy;
+      d =  ywidth;
+    e = xwidth/2;
+        
+      let keypoint = poses[i].pose.keypoints[j];
+      // Only draw an ellipse is the pose probability is bigger than 0.2
+      if (keypoint.score > 0.2) {
+        fill(255, 0, 0);
+        noStroke();
+
+      }
+    }
+  }
+}
+
+function mouseReleased() {
+  if (noises.isPlaying()) { // .isPlaying() returns a boolean
+    noises.stop();
+  } else {
+    noises.play();
+  }
+}
+
+
+function doubleClicked() {
+  pre.hide();
+  audio.play();
+  noises.pause();
+   lungs.show();
+}
+
+function changeBackground() {
+  post.show();
+  post.position(0, 0);
+   lungs.hide();
+}
